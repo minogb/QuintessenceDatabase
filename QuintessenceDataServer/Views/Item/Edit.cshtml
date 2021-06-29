@@ -63,10 +63,9 @@
                         </select>
                         Slot
                         <select class="form-select form-select-sm" aria-label=".form-select-sm example" style="width:100%;" id="Slot">
-
                         </select>
                     </td>
-                    <td >
+                    <td>
                         <div class="row" id="AvaliableSlots">
                         </div>
                     </td>
@@ -83,7 +82,7 @@
 <div class="container row">
     <div class="col">
         <h4>Tool Data</h4>
-        <table class="table table-striped table-bordered table-hover">
+        <table id="toolData" class="table table-striped table-bordered table-hover">
             <tr>
                 <th>
                     Tool Type
@@ -98,27 +97,6 @@
                     Is Modifier
                 </th>
             </tr>
-            @if (Model.Tools != null) {
-                foreach (var tool in Model.Tools) {
-                    <tr>
-                        <td>
-                            <input type="number" id="ToolType" min="0" class="form-control" value="0">
-
-                        </td>
-                        <td>
-                            <input type="number" id="ToolLevel" min="0" class="form-control" value="0">
-
-                        </td>
-                        <td>
-                            <input type="number" id="Efficiency" class="form-control" value="0">
-
-                        </td>
-                        <td onclick="checkSubbox(event)" class="text-center">
-                            <input class="form-check-label" type="checkbox" id="IsModifier" checked>
-                        </td>
-                    </tr>
-                }
-            }
         </table>
     </div>
     <div class="col">
@@ -162,72 +140,94 @@
 </p>
 @section Scripts{
     <script>
-    var ParentSlot = null;
-    var Slot = null;
-    var SubSlots = null;
-    var ToolData = @Html.Raw(Model.GetToolsAsJson());
-    var LevelData =@Html.Raw(Model.GetSkillsAsJson());
-    @if (Model.Equipment != null) {
-        if (Model.Equipment.ParentSlot.HasValue) {
-            @:ParentSlot = @Model.Equipment.ParentSlot;
+        var ParentSlot = null;
+        var Slot = null;
+        var SubSlots = null;
+        var ToolData = @Html.Raw(Model.GetToolsAsJson());
+        var LevelData =@Html.Raw(Model.GetSkillsAsJson());
+        @if (Model.Equipment != null) {
+            if (Model.Equipment.ParentSlot.HasValue) {
+                @:ParentSlot = @Model.Equipment.ParentSlot;
+            }
+            if (Model.Equipment.AvailableSlots.HasValue) {
+                @:SubSlots=@Model.Equipment.AvailableSlots;
+            }
+            @:Slot = @Model.Equipment.Slot;
         }
-        if (Model.Equipment.AvailableSlots.HasValue) {
-            @:SubSlots=@Model.Equipment.AvailableSlots;
-        }
-        @:Slot = @Model.Equipment.Slot;
-    }
-    ParentSlot = $("#ParentSlot").val();
-    fetchUpdatedSlots(false);
-    $("#ParentSlot").change(fetchUpdatedSlots);
-    $("#Slot").change(fetchUpdatedSubSlots);
-    function checkSubbox(event) {
-        $(event.target).children().each(function () {
-            $(this).attr("checked", !$(this).attr("checked"));
-        });
-    }
-    function fetchUpdatedSlots(update = true) {
-        if (update) {
-            ParentSlot = $("#ParentSlot").val();
-            SubSlots = null;
-        }
-        $("#Slot").empty();
-        $("#AvaliableSlots").empty();
-        $.getJSON("../Slots/" + ParentSlot).done(function (json) {
-            $.each(json, function (current) {
-                $("#Slot").append(new Option(json[current]["Name"], json[current]["SlotID"], null, json[current]["SlotID"] == Slot));
+        ParentSlot = $("#ParentSlot").val();
+        fetchUpdatedSlots(false);
+        $("#ParentSlot").change(fetchUpdatedSlots);
+        $("#Slot").change(fetchUpdatedSubSlots);
+        function checkSubbox(event) {
+            $(event.target).children().each(function () {
+                $(this).attr("checked", !$(this).attr("checked"));
             });
-        });
-        fetchUpdatedSubSlots(update);
-    }
-    function fetchUpdatedSubSlots(update = true) {
-        if (ParentSlot == null || ParentSlot == 0) {
+        }
+        function fetchUpdatedSlots(update = true) {
             if (update) {
-                Slot = $("#Slot").val();
+                ParentSlot = $("#ParentSlot").val();
                 SubSlots = null;
             }
-            $.getJSON("../Slots/" + Slot).done(function (json) {
-                $("#AvaliableSlots").empty();
+            $("#Slot").empty();
+            $("#AvaliableSlots").empty();
+            $.getJSON("../Slots/" + ParentSlot).done(function (json) {
                 $.each(json, function (current) {
-                    var newCol = document.createElement('div');
-                    newCol.classList.add("col-3");
-                    var label = document.createElement('label');
-                    var input = document.createElement('input');
-                    label.classList.add('form-check-label');
-                    label.htmlFor = json[current]["SlotID"];
-                    label.innerText = json[current]["Name"];
-                    input.classList.add("form-check-input");
-                    input.type = "checkbox";
-                    input.value = json[current]["SlotID"];
-                    input.checked = SubSlots & json[current]["SlotID"];
-                    newCol.append(input);
-                    newCol.append(label);
-                    $("#AvaliableSlots").append(newCol );
+                    $("#Slot").append(new Option(json[current]["Name"], json[current]["SlotID"], null, json[current]["SlotID"] == Slot));
                 });
             });
+            fetchUpdatedSubSlots(update);
         }
-    }
-    function fetchUpdatedToolData() {
+        function fetchUpdatedSubSlots(update = true) {
+            if (ParentSlot == null || ParentSlot == 0) {
+                if (update) {
+                    Slot = $("#Slot").val();
+                    SubSlots = null;
+                }
+                $.getJSON("../Slots/" + Slot).done(function (json) {
+                    $("#AvaliableSlots").empty();
+                    $.each(json, function (current) {
+                        var newCol = document.createElement('div');
+                        newCol.classList.add("col-3");
+                        var label = document.createElement('label');
+                        var input = document.createElement('input');
+                        label.classList.add('form-check-label');
+                        label.htmlFor = json[current]["SlotID"];
+                        label.innerText = json[current]["Name"];
+                        input.classList.add("form-check-input");
+                        input.type = "checkbox";
+                        input.value = json[current]["SlotID"];
+                        input.checked = SubSlots & json[current]["SlotID"];
+                        newCol.append(input);
+                        newCol.append(label);
+                        $("#AvaliableSlots").append(newCol );
+                    });
+                });
+            }
+        }
+        function fetchUpdatedToolData() {
 
-    }
+        }
+        function AddToolDataRow(toolData) {
+            var newRow = document.createElement('tr');
+            var ToolTypeTD = document.createElement('td');
+            var ToolLevelTD = document.createElement('td');
+            var IsModifierTD = document.createElement('td');
+
+            var ToolTypeInput = document.createElement('input');
+            var ToolLevelInput = document.createElement('input');
+            var IsModifierInput = document.createElement('input');
+
+            var input = document.createElement('input');
+            label.classList.add('form-check-label');
+            label.htmlFor = json[current]["SlotID"];
+            label.innerText = json[current]["Name"];
+            input.classList.add("form-check-input");
+            input.type = "checkbox";
+            input.value = json[current]["SlotID"];
+            input.checked = SubSlots & json[current]["SlotID"];
+            newRow.append(input);
+            newRow.append(label);
+            $("#toolData").append(newRow);
+        }
     </script>
 }
