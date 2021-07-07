@@ -75,6 +75,9 @@
     <Build Include="Table\Tool.sql" />
     <Build Include="Table\SkillRequirement.sql" />
     <Build Include="SelectAllSlotEnums.sql" />
+    <Build Include="Table\StatTable.sql" />
+    <Build Include="Table\EquipmentStatModifier.sql" />
+    <Build Include="SelectEquipmentStatModifiers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="QuintessenceDatabase.refactorlog" />

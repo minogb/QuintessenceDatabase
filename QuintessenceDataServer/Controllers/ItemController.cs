@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
@@ -57,20 +58,30 @@ namespace QuintessenceDataServer.Controllers
             return View(item);
         }
 
+        struct json {
+            public string error;
+            public string message;
+        };
         // POST: Item/Edit/5
         //TODO: authintication
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public JsonResult Edit(int id, string json)
         {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
+            try {
+                Models.Item item = new Models.Item();
+                string retVar = item.LoadFromCollection(id,json);
+                if (string.IsNullOrEmpty(retVar)) {
+                    var j = new json { error = "0", message = "Save success" };
+                    return Json(j);
+                }
+                else { 
+                    var j = new json { error = "422", message = retVar };
+                    return Json(j);
+                }
             }
-            catch
-            {
-                return View();
+            catch(Exception e) {
+                var j = new json { error = "500", message = e.Message};
+                return Json(j);
             }
         }
 

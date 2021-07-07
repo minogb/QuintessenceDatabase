@@ -6,7 +6,9 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json;
-
+using System.Web.Mvc;
+using System.IO;
+using Microsoft.Web.Helpers;
 namespace QuintessenceDataServer.Models {
     public class Item {
         public struct SimpleItem {
@@ -115,6 +117,32 @@ namespace QuintessenceDataServer.Models {
             LoadItem();
             LoadToolData();
             LoadSkillData();
+        }
+        public Item() {
+
+        }
+        public string LoadFromCollection(int id, string json) {
+            if (string.IsNullOrEmpty(json))
+                return "No save data passed";
+            ItemID = id;
+            var reader = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            Name = reader["Name"].Trim();
+            Description = reader["Description"];
+            if (string.IsNullOrEmpty(Name)) {
+                return "Item name is empty";
+            }
+            if (string.IsNullOrEmpty(Description)) {
+                return "Item description is empty";
+            }
+            int stack;
+            if (int.TryParse(reader["StackSize"], out stack)) {
+                StackSize = stack;
+            }
+            foreach(var current in JsonConvert.DeserializeObject<string[]>(reader["ToolData"])) {
+                
+                //TODO:
+            }
+            return "";
         }
         public string GetToolsAsJson() {
             return JsonConvert.SerializeObject(Tools.ToArray());

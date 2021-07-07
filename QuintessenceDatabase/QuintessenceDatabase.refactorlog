@@ -168,4 +168,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="SubTable" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c022b12a-b847-4014-9be0-fa9b6a41c576" ChangeDateTime="07/07/2021 00:47:44">
+    <Property Name="ElementName" Value="[dbo].[StatTable].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[StatTable]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="StatID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="86e27f99-b134-48e8-8a28-d6958d5090a1" ChangeDateTime="07/07/2021 00:48:12">
+    <Property Name="ElementName" Value="[dbo].[EquipmentStatModifier].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[EquipmentStatModifier]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="StatID" />
+  </Operation>
 </Operations>

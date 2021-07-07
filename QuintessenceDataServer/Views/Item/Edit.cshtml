@@ -8,8 +8,9 @@
     }
 }
 <br />
-<h2>@Model.Name</h2>
-
+<div class="row">
+    <input id="Name" class="form-control" style="font-size:25px;width:325px;resize:none;" value="@Model.Name">
+</div>
 <div>
     <hr />
     <dl class="dl-horizontal">
@@ -18,7 +19,9 @@
 
 <div class="container row">
     <div class="col col-lg-3">
-        <div style="width:250px;height:250px; background-color: lightblue;"></div>
+        <div style="width:285px;height:285px; background-color: lightblue;"></div>
+        <br />
+        <button class="btn-primary btn" style="width:100%;" type="button" onclick="saveItem()">Save</button>
     </div>
     <div class="col" style="width:100%;">
         <h4>Base Item Information:</h4>
@@ -85,6 +88,9 @@
         <table id="toolData" class="table table-striped table-bordered table-hover">
             <tr>
                 <th>
+                    Delete
+                </th>
+                <th>
                     Tool Type
                 </th>
                 <th>
@@ -98,11 +104,15 @@
                 </th>
             </tr>
         </table>
+        <button style="width:100%;" class="btn btn-primary" type="button" onclick="AddToolDataRow()">+</button>
     </div>
     <div class="col">
         <h4>Level Requirement Data</h4>
-        <table class="table table-striped table-bordered table-hover">
+        <table id="levelData" class="table table-striped table-bordered table-hover">
             <tr>
+                <th>
+                    Delete
+                </th>
                 <th>
                     Skill
                 </th>
@@ -113,27 +123,11 @@
                     Is Modifier
                 </th>
             </tr>
-            @if (Model.Skills != null) {
-                foreach (var skill in Model.Skills) {
-                    <tr>
-                        <td>
-                            @skill.Skill
-                        </td>
-                        <td>
-                            @skill.Level
-                        </td>
-                        <td class="text-center">
-                            @if (skill.IsModifier) {
-                                WriteLiteral("&#10003");
-                            }
-                        </td>
-                    </tr>
-                }
-            }
         </table>
+        <button style="width:100%;" class="btn btn-primary" type="button" onclick="AddLevelRow()">+</button>
     </div>
 </div>
-
+<br />
 <p>
     <!-- @Html.ActionLink("Edit", "Edit", new { id = Model.ItemID }) |-->
     @Html.ActionLink("Back to List", "Index")
@@ -158,9 +152,69 @@
         fetchUpdatedSlots(false);
         $("#ParentSlot").change(fetchUpdatedSlots);
         $("#Slot").change(fetchUpdatedSubSlots);
+        fetchUpdatedToolData();
+        fetchUpdatedLevel();
+        function saveItem() {
+            var SaveValues = new Array();
+            SaveValues["StackSize"] = $("#StackSize").val();
+            SaveValues["Description"] = $("#Description").val();
+            SaveValues["Name"] = $("#Name").val();
+            SaveValues["ParentSlot"] = $("#ParentSlot").val();
+            SaveValues["Slot"] = $("#Slot").val();
+            SaveValues["ToolData"] = new Array();
+            SaveValues["LevelData"] = new Array();
+            SaveValues["SubSlots"] = 0;
+            var skip = true;
+            $("#toolData").find('tr').each(function () {
+                if (skip) {
+                    skip = false;
+                    return;
+                }
+                var tool = new Array();
+                tool['ToolID'] = $(this).attr('id');
+                tool['ToolType']= $(this).find('#ToolType').val();
+                tool['ToolLevel']= $(this).find('#ToolLevel').val();
+                tool['Efficiency']= $(this).find('#Efficiency').val();
+                tool['IsModifier'] =  $(this).find('#IsModifier').is(':checked');
+                SaveValues["ToolData"].push(tool);
+            });
+            skip = true;
+            $("#levelData").find('tr').each(function () {
+                if (skip) {
+                    skip = false;
+                    return;
+                }
+                var level = new Array();
+                level['SkillID'] = $(this).attr('id');
+                level['Skill']= $(this).find('#Skill').val();
+                level['Level']= $(this).find('#Level').val();
+                level['IsModifier'] =  $(this).find('#IsModifier').is(':checked');
+                SaveValues["LevelData"].push(level);
+            });
+            $("#AvaliableSlots").find('input').each(function () {
+                if ($(this).is(':checked')) {
+                    SaveValues["SubSlots"] |= $(this).val();
+                }
+            });
+            $.post(window.location.href, SaveValues).done(function (json) {
+                if (json["error"] != 0) {
+                }
+                else {
+
+                }
+                //TODO;
+                alert(json["message"]);
+            });
+        }
+        function deleteData(event) {
+            if (event == null)
+                return;
+            $($(this).parent().parent()).remove();
+        }
         function checkSubbox(event) {
             $(event.target).children().each(function () {
-                $(this).attr("checked", !$(this).attr("checked"));
+                $(this).click();
+                //$(this).attr("checked", !$(this).attr("checked"));
             });
         }
         function fetchUpdatedSlots(update = true) {
@@ -205,28 +259,118 @@
             }
         }
         function fetchUpdatedToolData() {
+                $.each(ToolData, function (current) {
+                    AddToolDataRow(ToolData[current]);
+                });
+        }
+        function fetchUpdatedLevel() {
+                $.each(LevelData, function (current) {
+                    AddLevelRow(LevelData[current]);
+                });
+        }
+        function AddLevelRow(data) {
+            var newRow = document.createElement('tr');
+            var deleteTD = document.createElement('td');
+            var SkillTD = document.createElement('td');
+            var LevelTD = document.createElement('td');
+            var IsModifierTD = document.createElement('td');
+            IsModifierTD.classList.add("text-center");
+            $(IsModifierTD).click(checkSubbox);
 
+            var SkillInput = document.createElement('input');
+            SkillInput.type = "number";
+            SkillInput.id = "Skill";
+            SkillInput.classList.add("form-control");
+            SkillTD.appendChild(SkillInput);
+
+            var LevelInput = document.createElement('input');
+            LevelInput.type = "number";
+            LevelInput.id = "Level";
+            LevelInput.classList.add("form-control");
+            LevelTD.appendChild(LevelInput);
+
+            var IsModifierInput = document.createElement('input');
+            IsModifierInput.type = "checkbox";
+            IsModifierInput.id = "IsModifier";
+            IsModifierInput.classList.add("form-check-label");
+            IsModifierTD.appendChild(IsModifierInput);
+
+            var deletButton = document.createElement('button');
+            deletButton.classList.add("btn");
+            deletButton.classList.add("btn-primary");
+            deletButton.type = "button";
+            deletButton.innerHTML="-";
+            $(deletButton).click(deleteData);
+            deleteTD.append(deletButton);
+
+            if (data != null) {
+                SkillInput.value = data["Skill"];
+                LevelInput.value = data["Level"];
+                IsModifierInput.checked = data["IsModifier"];
+                newRow.id = data["SkillID"];
+            }
+            newRow.append(deleteTD);
+            newRow.append(SkillTD);
+            newRow.append(LevelTD);
+            newRow.append(IsModifierTD);
+
+            $("#levelData").append(newRow);
         }
         function AddToolDataRow(toolData) {
             var newRow = document.createElement('tr');
+            var deleteTD = document.createElement('td');
             var ToolTypeTD = document.createElement('td');
             var ToolLevelTD = document.createElement('td');
+            var EfficiencyTD = document.createElement('td');
             var IsModifierTD = document.createElement('td');
+            IsModifierTD.classList.add("text-center");
+            $(IsModifierTD).click(checkSubbox);
 
             var ToolTypeInput = document.createElement('input');
-            var ToolLevelInput = document.createElement('input');
-            var IsModifierInput = document.createElement('input');
+            ToolTypeInput.type = "number";
+            ToolTypeInput.id = "ToolType";
+            ToolTypeInput.classList.add("form-control");
+            ToolTypeTD.appendChild(ToolTypeInput);
 
-            var input = document.createElement('input');
-            label.classList.add('form-check-label');
-            label.htmlFor = json[current]["SlotID"];
-            label.innerText = json[current]["Name"];
-            input.classList.add("form-check-input");
-            input.type = "checkbox";
-            input.value = json[current]["SlotID"];
-            input.checked = SubSlots & json[current]["SlotID"];
-            newRow.append(input);
-            newRow.append(label);
+            var ToolLevelInput = document.createElement('input');
+            ToolLevelInput.type = "number";
+            ToolLevelInput.id = "ToolLevel";
+            ToolLevelInput.classList.add("form-control");
+            ToolLevelTD.appendChild(ToolLevelInput);
+
+            var EfficiencyInput = document.createElement('input');
+            EfficiencyInput.type = "number";
+            EfficiencyInput.id = "Efficiency";
+            EfficiencyInput.classList.add("form-control");
+            EfficiencyTD.appendChild(EfficiencyInput);
+
+            var IsModifierInput = document.createElement('input');
+            IsModifierInput.type = "checkbox";
+            IsModifierInput.id = "IsModifier";
+            IsModifierInput.classList.add("form-check-label");
+            IsModifierTD.appendChild(IsModifierInput);
+
+            var deletButton = document.createElement('button');
+            deletButton.classList.add("btn");
+            deletButton.classList.add("btn-primary");
+            deletButton.type = "button";
+            deletButton.innerHTML="-";
+            $(deletButton).click(deleteData);
+            deleteTD.append(deletButton);
+
+            if (toolData != null) {
+                ToolTypeInput.value = toolData["ToolType"];
+                ToolLevelInput.value = toolData["ToolLevel"];
+                EfficiencyInput.value = toolData["Efficiency"];
+                IsModifierInput.checked = toolData["IsModifier"];
+                newRow.id = toolData["ToolID"];
+            }
+            newRow.append(deleteTD);
+            newRow.append(ToolTypeTD);
+            newRow.append(ToolLevelTD);
+            newRow.append(EfficiencyTD);
+            newRow.append(IsModifierTD);
+
             $("#toolData").append(newRow);
         }
     </script>
