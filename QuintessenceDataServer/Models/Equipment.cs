@@ -6,6 +6,9 @@ using System.Linq;
 using System.Web;
 
 namespace QuintessenceDataServer.Models {
+    struct EquipmentStatModifier {
+        int 
+    }
     public class Equipment {
         public int ItemID;
         public int Slot;

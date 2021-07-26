@@ -2,5 +2,6 @@
 (
 	[StatID] INT NOT NULL, 
     [EquipmentID] INT NOT NULL,
-	PRIMARY KEY(StatID, EquipmentID)
+	[Modifier] INT NOT NULL, 
+    PRIMARY KEY(StatID, EquipmentID)
 )
